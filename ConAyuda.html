@@ -1,0 +1,37 @@
+<html style="background-color: black">
+	<head>
+		<title>canvas</title>
+	</head>
+	<body>
+		<canvas id="canvas" style="background-color: salmon;"></canvas>
+	</body>
+	<script>
+		var canvas = document.getElementById('canvas');
+
+		if (canvas.getContext) 
+		{
+			var ctx = canvas.getContext('2d');
+			var isP;
+
+			canvas.addEventListener('mousemove',function(evt){ 
+
+				if(isP)
+                {
+                	ctx.fillStyle = "rgb(239,255,7)"; 
+                	ctx.beginPath();
+                	ctx.arc(evt.offsetX, evt.offsetY,5,0,2*Math.PI);
+                	ctx.fill();
+                }
+            });
+
+			canvas.addEventListener('mousedown',function(evt){ 
+				isP = true;
+            });
+
+			canvas.addEventListener('mouseup',function(evt){ 
+				isP = false;
+            });				
+		}
+
+	</script>
+</html>
