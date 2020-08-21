@@ -1,0 +1,79 @@
+<html style="background-color: black">
+	<head>
+		<title>canvas</title>
+	</head>
+	<body>
+		<canvas id="canvas" style="background-color: salmon; width: 1000px; height: 500px;"></canvas>
+		<!-- <img id="sa" src="sa.jpg"> -->
+	</body>
+	<script>
+		var canvas = document.getElementById('canvas');
+		if (canvas.getContext) 
+		{
+			var ctx = canvas.getContext('2d');
+			
+			ctx.beginPath();
+			ctx.arc(250,25,18,0,2 * Math.PI);
+			ctx.fillStyle = 'yellow';
+			ctx.fill();
+
+			ctx.fillStyle = 'brown';
+			ctx.fillRect(15,80,10,60);
+			
+			ctx.beginPath();
+			ctx.arc(15,65,18,0,2 * Math.PI);
+			ctx.fillStyle = 'green';
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(35,65,18,0,2 * Math.PI);
+			ctx.fillStyle = 'green';
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(25,85,18,0,2 * Math.PI);
+			ctx.fillStyle = 'green';
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(25,65,5,0,2 * Math.PI);
+			ctx.fillStyle = 'red';
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(15,55,5,0,2 * Math.PI);
+			ctx.fillStyle = 'red';
+			ctx.fill();
+
+			ctx.beginPath();
+			ctx.arc(25,85,5,0,2 * Math.PI);
+			ctx.fillStyle = 'red';
+			ctx.fill();
+
+			ctx.fillStyle = 'brown';
+			ctx.fillRect(150,90,60,50);
+
+			ctx.fillStyle = 'blue';
+			ctx.fillRect(190,100,15,15);
+
+			ctx.fillStyle = 'blue';
+			ctx.fillRect(155,100,15,15);
+
+			ctx.fillStyle = 'black';
+			ctx.fillRect(175,120,10,20);
+
+			ctx.beginPath();
+			ctx.arc(183,130,1,0,2 * Math.PI);
+			ctx.fillStyle = 'white';
+			ctx.fill();
+
+			ctx.fillStyle = 'gray';
+			ctx.moveTo(150,90);
+			ctx.lineTo(180,60);
+			ctx.lineTo(210,90);
+			ctx.fill();
+						
+		}
+
+	</script>
+</html>
