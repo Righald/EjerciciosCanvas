@@ -34,6 +34,7 @@
 		var player = null, food = null;
 		var puntaje = 0;
 		const etiqueta =  document.getElementById("tag");
+		var pausa = false;
 
 		window.requestAnimationFrame = (function(){
 			return window.requestAnimationFrame || 
@@ -77,39 +78,46 @@
 		}
 
 		function upt(){
-
-			if (lastPress==UP) {
-				player.y -=speed;
-				if(player.y<0){
-					player.y = canvas.height;
-				}
-			}
-			if (lastPress==DOWN) {
-				player.y += speed;
-				if(player.y>=canvas.height){
-					player.y = -10;
-				}
-			}
-			if (lastPress==LEFT) {
-				player.x -= speed;
-				if (player.x<0) {
-					player.x = canvas.width;
-				}
-			}
-			if (lastPress==RIGHT) {
-				player.x += speed;
-				if(player.x>canvas.width){
-					player.x = -10;
-				}
-			}  
-			
-			if (player.intersects(food)) {
-				food.x = random(canvas.width-10);
-				food.y = random(canvas.height-10);
-				puntaje+=10;
-				console.log(puntaje);
+			if(pausa != false) {
 				etiqueta.innerHTML = "Puntaje: "+puntaje; 
+				if (lastPress==UP) {
+					player.y -=speed;
+					if(player.y<0){
+						player.y = canvas.height;
+					}
+				}
+				if (lastPress==DOWN) {
+					player.y += speed;
+					if(player.y>=canvas.height){
+						player.y = -10;
+					}
+				}
+				if (lastPress==LEFT) {
+					player.x -= speed;
+					if (player.x<0) {
+						player.x = canvas.width;
+					}
+				}
+				if (lastPress==RIGHT) {
+					player.x += speed;
+					if(player.x>canvas.width){
+						player.x = -10;
+					}
+				}  
+				
+				if (player.intersects(food)) {
+					food.x = random(canvas.width-10);
+					food.y = random(canvas.height-10);
+					puntaje+=10;
+					console.log(puntaje);
+					etiqueta.innerHTML = "Puntaje: "+puntaje; 
+				}
 			}
+			else
+			{
+				etiqueta.innerHTML = "Juego Pausado"; 
+			}
+			
 		}
 
 		//se repite mucho
@@ -132,6 +140,7 @@
 		window.addEventListener('load',init,false);  
 
 		document.addEventListener('keydown',function(e){
+			console.log(e);
 			if(e.keyCode== 87 || e.keyCode == 38){
 				lastPress = UP;
 			}
@@ -143,6 +152,10 @@
 			}
 			if(e.keyCode== 68 || e.keyCode == 39){
 				lastPress = RIGHT;
+			}
+			if(e.keyCode== 32){
+				console.log("pausa");
+				pausa = !pausa;
 			}
 		})
 		 
