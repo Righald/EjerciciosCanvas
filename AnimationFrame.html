@@ -34,7 +34,7 @@
 		var player = null, food = null;
 		var puntaje = 0;
 		const etiqueta =  document.getElementById("tag");
-		var pausa = false;
+		var pausa = false, gameo = false;
 		var walls = new Array();
 
 
@@ -84,7 +84,7 @@
 		}
 
 		function upt(){
-			if(pausa != false) {
+			if(!pausa && !gameo) {
 				etiqueta.innerHTML = "Puntaje: "+puntaje; 
 				if (lastPress==UP) {
 					player.y -=speed;
@@ -121,13 +121,23 @@
 
 				for (var i = walls.length - 1; i >= 0; i--) {
 					if (player.intersects(walls[i])) {
-						console.log("Perdiste");
+						gameo = true;
 					}
 				}
 			}
-			else
+			else if(pausa)
 			{
 				etiqueta.innerHTML = "Juego Pausado"; 
+			}
+			else if(gameo)
+			{
+				etiqueta.innerHTML = "Juego Perdido";
+				setTimeout( function(){
+					etiqueta.innerHTML = "Puntaje: "+puntaje;
+					gameo = false;
+					puntaje = 0; 
+				} , 3000 )
+
 			}
 			
 		}
