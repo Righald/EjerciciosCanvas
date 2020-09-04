@@ -34,6 +34,11 @@
 		var player = null, food = null;
 		var puntaje = 0;
 		const etiqueta =  document.getElementById("tag");
+		var pausa = false, gameo = false;
+		var walls = new Array();
+		var player_img = new Image();
+		var food_img = new Image();
+		var crunch = new Audio(), rip = new Audio(), sound_p = new Audio();
 
 		window.requestAnimationFrame = (function(){
 			return window.requestAnimationFrame || 
@@ -71,45 +76,76 @@
 			ctx.fillStyle = "#000";
 			ctx.fillRect(0,0,canvas.width,canvas.height);
 
-			player.paint(ctx); 
+			//player.paint(ctx); 
+			ctx.drawImage(player_img, player.x, player.y);
 
-			food.paint(ctx);
+			//food.paint(ctx);
+			ctx.drawImage(food_img, food.x, food.y);
+
+			for (var i = walls.length - 1; i >= 0; i--) {
+				walls[i].paint(ctx);
+			}
 		}
 
 		function upt(){
-
-			if (lastPress==UP) {
-				player.y -=speed;
-				if(player.y<0){
-					player.y = canvas.height;
-				}
-			}
-			if (lastPress==DOWN) {
-				player.y += speed;
-				if(player.y>=canvas.height){
-					player.y = -10;
-				}
-			}
-			if (lastPress==LEFT) {
-				player.x -= speed;
-				if (player.x<0) {
-					player.x = canvas.width;
-				}
-			}
-			if (lastPress==RIGHT) {
-				player.x += speed;
-				if(player.x>canvas.width){
-					player.x = -10;
-				}
-			}  
-			
-			if (player.intersects(food)) {
-				food.x = random(canvas.width-10);
-				food.y = random(canvas.height-10);
-				puntaje+=10;
-				console.log(puntaje);
+			if(!pausa && !gameo) {
 				etiqueta.innerHTML = "Puntaje: "+puntaje; 
+				if (lastPress==UP) {
+					player.y -=speed;
+					if(player.y<0){
+						player.y = canvas.height;
+					}
+				}
+				if (lastPress==DOWN) {
+					player.y += speed;
+					if(player.y>=canvas.height){
+						player.y = -10;
+					}
+				}
+				if (lastPress==LEFT) {
+					player.x -= speed;
+					if (player.x<0) {
+						player.x = canvas.width;
+					}
+				}
+				if (lastPress==RIGHT) {
+					player.x += speed;
+					if(player.x>canvas.width){
+						player.x = -10;
+					}
+				}  
+				
+				if (player.intersects(food)) {
+					food.x = random(canvas.width-10);
+					food.y = random(canvas.height-10);
+					puntaje+=10;
+					crunch.play();
+					console.log(puntaje);
+					etiqueta.innerHTML = "Puntaje: "+puntaje; 
+				}
+
+				for (var i = walls.length - 1; i >= 0; i--) {
+					if (player.intersects(walls[i])) {
+						gameo = true;
+					}
+				}
 			}
+			else if(pausa)
+			{
+				etiqueta.innerHTML = "Juego Pausado"; 
+			}
+			else if(gameo)
+			{
+				etiqueta.innerHTML = "Juego Perdido";
+				rip.play();
+				setTimeout( function(){
+					etiqueta.innerHTML = "Puntaje: "+puntaje;
+					gameo = false;
+					puntaje = 0; 
+				} , 3000 )
+
+			}
+			
 		}
 
 		//se repite mucho
@@ -123,8 +159,20 @@
 			canvas = document.getElementById('canvas');
 			ctx = canvas.getContext('2d');
 
-			player = new Rectangle(x,y,10,10,"#00FF00")
-			food = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"red")
+			player = new Rectangle(x,y,10,10,"#00FF00");
+			food = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"red");
+
+			player_img.src="player.png";
+			food_img.src="apple.png";
+
+			crunch.src="crunch.mp3";
+			rip.src="rip.mp3";
+			sound_p.src="paus.mp3";
+
+			walls.push(new Rectangle(60, 10, 35, 35, "gray"));
+			walls.push(new Rectangle(60, 250, 35, 35, "gray"));
+			walls.push(new Rectangle(300, 10, 35, 35, "gray"));
+			walls.push(new Rectangle(300, 250, 35, 35, "gray"));
 
 			run();
 		}
@@ -132,6 +180,7 @@
 		window.addEventListener('load',init,false);  
 
 		document.addEventListener('keydown',function(e){
+			console.log(e);
 			if(e.keyCode== 87 || e.keyCode == 38){
 				lastPress = UP;
 			}
@@ -143,6 +192,12 @@
 			}
 			if(e.keyCode== 68 || e.keyCode == 39){
 				lastPress = RIGHT;
+			}
+			if(e.keyCode== 32){
+				sound_p.play();
+				console.log("pausa");
+				pausa = !pausa;
+
 			}
 		})
 		 
