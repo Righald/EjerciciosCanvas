@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GG</title>
+	<style type="text/css">
+		.content{
+			width: 80%;
+			min-height: 200px;
+			background-color: gray;
+			margin: auto;
+		}
+		canvas{
+			background-color: white;
+			margin:auto;
+		}
+		.otherClass{
+
+		}
+	</style>
+</head>
+<body>  
+	<div class='content otherClass' data-id='1'>
+		<canvas id="canvas" width="500" height="500" ></canvas>
+
+	</div>
+	<script type="text/javascript">
+
+		var canvas = null, ctx = null, x = 0, y = 0;
+		var lastPress = 65, speed = 1.5, player = null, food =null, press = false;
+		var score = 0, pause = false, walls = new Array(), enemys  = new Array(), more = new Array();
+		var gameOver = false, gameWin = false;
+		var body = new Image(), apple = new Image();
+		var eat = new Audio(), end = new Audio(), ps = new Audio();
+		var lastUpdate = 0, FPS, frames, acumDelta=0;
+		var dirmore = 2;
+		var dir = 3;
+
+		window.requestAnimationFrame = (function()
+		{
+			return window.requestAnimationFrame || 
+			window.mozRequestAnimationFrame || 
+			window.webkitRequestAnimationFrame || 
+			
+			function (callback)
+			{
+				window.setTimeout(callback,17);
+			}
+
+		}());
+
+		function paint(ctx)
+		{
+			ctx.fillStyle = "black";
+			ctx.fillRect(0,0,canvas.width,canvas.height)
+
+			ctx.fillStyle = "#0f0";
+			player.paint(ctx);
+			//ctx.drawImage(body,player.x,player.y);
+
+			for (var i = enemys.length - 1; i >= 0; i--) 
+			{
+				ctx.fillStyle = "salmon";
+				enemys[i].paint(ctx);
+			}
+
+			for (var i = more.length - 1; i >= 0; i--) 
+			{
+				ctx.fillStyle = "RED";
+				more[i].paint(ctx);
+			}
+
+			ctx.fillStyle = "red";
+			food.paint(ctx);
+			//ctx.drawImage(apple,food.x,food.y);
+
+			//ctx.fillStyle = "white";
+			//ctx.textAlign = "left";
+			//ctx.fillText("SCORE: "+score , 10, 13);
+
+			ctx.fillStyle = "blue";
+
+			for (var i = walls.length - 1; i >= 0; i--) 
+			{
+				walls[i].paint(ctx);
+			}
+
+			if(pause && !gameOver)
+			{
+				ctx.fillStyle = "white";
+				ctx.textAlign = "center"; 
+				ctx.fillText(" P A U S E ",240,120);
+			} 
+
+			if(gameOver)
+			{
+				ctx.fillStyle = "white";
+				ctx.textAlign = "center";
+				ctx.fillText(" G A M E O V E R ",230,120);
+			}
+
+			if(gameWin)
+			{
+				ctx.fillStyle = "white";
+				ctx.textAlign = "center";
+				ctx.fillText(" H U E H U E H U E H U E ",230,120);
+			} 
+		}
+
+		function act()
+		{ 
+			//console.log(player.x, player.y);
+
+			if(!pause)
+			{ 
+
+				if(!gameOver && !gameWin)
+				{ 
+					moreEnemys();
+					moveEnemys();
+					
+					for (var i = walls.length - 1; i >= 0; i--) 
+					{
+						for (var j = more.length - 1; j >= 0; j--) 
+						{
+							if(walls[i].intersects(more[j]))
+							{
+								switch(dir)
+								{
+									case 0:
+										dirmore = 1;
+										break;
+									case 1:
+										dirmore =  0;
+										break;
+									case 2:
+										dirmore = 3;
+										break;
+									case 3:
+										dirmore = 2;
+										break;					
+								}
+							}
+						}
+					}
+					
+					for (var i = walls.length - 1; i >= 0; i--) 
+					{
+						for (var j = enemys.length - 1; j >= 0; j--) 
+						{
+							if(walls[i].intersects(enemys[j]))
+							{
+								switch(dir)
+								{
+									case 0:
+										dir = 1;
+										break;
+									case 1:
+										dir =  0;
+										break;
+									case 2:
+										dir = 3;
+										break;
+									case 3:
+										dir = 2;
+										break;					
+								}
+							}
+						}
+					}
+
+					if(press)
+					{
+						for (var i = walls.length - 1; i >= 0; i--) 
+						{
+
+							if(walls[i].intersects(player))
+							{
+								//gameOver = true;
+								if(lastPress==65 || lastPress == 37)
+								{ //izquierda
+									player.x += speed+.5;
+									if (player.x < 0 ) 
+									{
+										player.x = canvas.width;
+									}
+								}
+
+								if(lastPress==68 || lastPress == 39)
+								{ //derecha
+									player.x -= speed-.5;
+									if(player.x > canvas.width)
+									{
+										player.x = -10;
+									}
+								}
+
+								if(lastPress==87 || lastPress == 38)
+								{ //arriba
+									player.y += speed+.5;
+									if (player.y < 0) 
+									{
+										player.y = canvas.height;
+									}
+								}
+
+								if(lastPress==83 || lastPress == 40)
+								{ //abajo
+									player.y -= speed-.5;
+									if (player.y > canvas.height) 
+									{
+										player.y = -10;
+									}
+								} 
+
+								lastPress = null;
+								//setTimeout('reset()',3000);
+								//end.play();
+							}
+						}
+
+						if(lastPress==65 || lastPress == 37){ //izquierda
+							player.x -= speed+2;
+							if (player.x < 0 ) 
+							{
+								player.x = canvas.width;
+							}
+						}
+
+						if(lastPress==68 || lastPress == 39)
+						{ //derecha
+							player.x += speed+2;
+							if(player.x > canvas.width)
+							{
+								player.x = -10;
+							}
+						}
+
+						if(lastPress==87 || lastPress == 38)
+						{ //arriba
+							player.y -= speed+2;
+							if (player.y < 0) 
+							{
+								player.y = canvas.height;
+							}
+						}
+
+						if(lastPress==83 || lastPress == 40)
+						{ //abajo
+							player.y += speed+2;
+							if (player.y > canvas.height) 
+							{
+								player.y = -10;
+							}
+						}
+						
+						for (var i = enemys.length - 1; i >= 0; i--) 
+						{
+							if(enemys[i].intersects(player))
+							{
+								gameOver = true;
+								setTimeout('reset()',4000);
+							} 
+						}
+
+						for (var i = more.length - 1; i >= 0; i--) 
+						{
+							if(more[i].intersects(player))
+							{
+								gameOver = true;
+								setTimeout('reset()',4000);
+							} 
+						}
+
+						if(player.intersects(food))
+						{
+							gameWin = true;
+							setTimeout('reset()',4000);
+							//food.x = random(canvas.width);
+							//food.y = random(canvas.height);
+							//score += 10;
+							//speed += 0.2; 
+							//eat.play();
+						}
+					}
+				}
+			}
+		}
+
+		function run()
+		{
+			window.requestAnimationFrame(run);
+			act();
+			paint(ctx);
+
+			var now = Date.now(); 
+			deltaTime = (now - lastUpdate) / 1000;
+			
+			if(deltaTime > 1)
+			{
+				deltaTime = 0;
+			}
+
+			lastUpdate = now;
+
+			frames += 1;
+			acumDelta += deltaTime;
+			
+			if(acumDelta>1)
+			{
+				FPS = frames;
+				frames = 0;
+				acumDelta -=1;
+			}
+		}
+
+		function reset()
+		{
+			gameWin = false;
+			gameOver = false;
+			lastPress = 65;
+			speed = 2;
+			score = 0;
+
+			player.x = 10;
+			player.y = 10;
+
+			food.x = canvas.width-12;
+			food.y = canvas.height-12;
+			food.w = 50;
+		}
+
+		function init()
+		{
+			canvas = document.getElementById('canvas');
+			ctx = canvas.getContext('2d');
+
+			body.src = "assets/head.png";
+			apple.src = "assets/apple.png";
+
+			player = new Rectangle(10,10,10,10,body);
+			food = new Rectangle(canvas.width-50,canvas.height-12,50,10,apple);
+
+			enemys.push(new Rectangle(55,10,10,10,body));
+			enemys.push(new Rectangle(135,10,10,10,body));
+			enemys.push(new Rectangle(220,10,10,10,body));
+			//enemys.push(new Rectangle(355,10,10,10,body));
+			//enemys.push(new Rectangle(455,10,10,10,body));
+
+			more.push(new Rectangle(85,490,10,10,body));
+			more.push(new Rectangle(175,490,10,10,body));
+			more.push(new Rectangle(285,490,10,10,body));
+			//more.push(new Rectangle(385,490,10,10,body));
+			//more.push(new Rectangle(485,490,10,10,body));
+
+			walls.push(new Rectangle(0,0,canvas.width,3,null));
+			walls.push(new Rectangle(0,0,3,canvas.height,null));
+			walls.push(new Rectangle(canvas.width-3,0,3,canvas.height,null));
+			walls.push(new Rectangle(0,canvas.height-3,canvas.width,3,null));
+
+			walls.push(new Rectangle(30,0, 10,230, null));
+			walls.push(new Rectangle(30,250, 10,250, null));
+			
+			walls.push(new Rectangle(110,0, 10,480, null));
+
+			walls.push(new Rectangle(197, 20, 10,480, null));
+
+			walls.push(new Rectangle(240, 0, 10,100, null));
+			walls.push(new Rectangle(240, 120, 10,100, null));
+			walls.push(new Rectangle(240, 240, 10,100, null));
+			walls.push(new Rectangle(240, 360, 10,120, null));
+
+			walls.push(new Rectangle(250, 120, 10,10, null));
+			walls.push(new Rectangle(250, 240, 70,10, null));
+			walls.push(new Rectangle(250, 360,10,10, null));
+			walls.push(new Rectangle(250, 470, 10,10, null));
+
+			walls.push(new Rectangle(250, 90, 140,10, null));
+			walls.push(new Rectangle(270, 30, 110,10, null));
+			walls.push(new Rectangle(280, 60, 80,10, null));
+			walls.push(new Rectangle(380, 30, 10,60, null));
+			walls.push(new Rectangle(270, 30, 10,40, null));
+			walls.push(new Rectangle(250, 90, 30,10, null));
+			walls.push(new Rectangle(250, 210, 10,10, null));
+			walls.push(new Rectangle(250, 330, 120,10, null));
+			walls.push(new Rectangle(300, 340, 10,140, null));
+			walls.push(new Rectangle(250, 400, 150,10, null));
+			walls.push(new Rectangle(260, 160, 50,10, null));
+			walls.push(new Rectangle(260, 120, 10,100, null));
+			walls.push(new Rectangle(310, 130, 10,160, null));
+			walls.push(new Rectangle(340, 150, 10,160, null));
+
+			walls.push(new Rectangle(370, 230, 10,150, null));
+
+			walls.push(new Rectangle(450, 330, 5,110, null));
+			walls.push(new Rectangle(450, 460, 10,60, null));
+			walls.push(new Rectangle(350, 430, 100,10, null));
+			walls.push(new Rectangle(350, 460, 100,10, null));
+			walls.push(new Rectangle(350, 430, 10,30, null));
+
+			walls.push(new Rectangle(420, 50, 10,350, null));
+			walls.push(new Rectangle(395, 150, 10,280, null));
+			
+			walls.push(new Rectangle(475, 60, 5,80, null));
+			walls.push(new Rectangle(420, 80, 55,3, null));
+			walls.push(new Rectangle(450, 130, 5,90, null));
+			walls.push(new Rectangle(450, 180, 90,5, null));			
+			walls.push(new Rectangle(475, 220, 5,130, null));
+			walls.push(new Rectangle(420, 240, 55,5, null));
+
+			walls.push(new Rectangle(475, 60, 5,80, null));
+
+
+			eat.src = "assets/crunch.mp3"; 
+			end.src = "assets/game_over.mp3";
+			ps.src = "assets/pause.mp3";
+			
+
+			run();
+		} 
+		
+		window.addEventListener('load',init,false);
+		
+		document.addEventListener('keydown',function(e)
+		{ 
+			if(e.keyCode==65 || e.keyCode ==  37 || e.keyCode ==  68 || e.keyCode ==  39 || e.keyCode ==  87 || e.keyCode ==  38 || e.keyCode ==  83 || e.keyCode ==  40 )
+			{	
+				press = true;
+				//console.log(press)
+				lastPress = e.keyCode;
+
+			}
+			else if(e.keyCode==32)
+			{
+
+				pause = (pause)?false:true; 
+				ps.play();
+			}
+		})
+
+		document.addEventListener('keyup',function(e)
+		{ 
+			if(e.keyCode==65 || e.keyCode ==  37 || e.keyCode ==  68 || e.keyCode ==  39 || e.keyCode ==  87 || e.keyCode ==  38 || e.keyCode ==  83 || e.keyCode ==  40 )
+			{	
+				press = false;
+				//console.log(press)
+			}
+		})
+
+		function Rectangle(x,y,w,h,image)
+		{
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+			this.image = image;
+
+			this.paint = function(ctx)
+			{
+				if(image!=null)
+				{
+					try
+					{
+						ctx.drawImage(this.image,this.x,this.y);
+					}
+					catch(e)
+					{
+						ctx.fillRect(this.x,this.y,this.w,this.h);
+					}
+					
+				}
+				else
+					ctx.fillRect(this.x,this.y,this.w,this.h);
+			}
+
+			this.intersects = function(rect)
+			{
+				if (this.x < rect.x + rect.w && this.x + this.w > rect.x && 
+					this.y < rect.y + rect.h && this.y + this.h > rect.y)
+				{
+					return true;
+				}
+			}
+		}
+
+		function moreEnemys()
+		{
+			for (var i = more.length - 1; i >= 0; i--) 
+			{
+				switch(dirmore)
+				{
+					case 0:
+						//console.log("Se movió para derecha")
+						more[i].x += speed+3;
+						if(more[i].x > canvas.width)
+						{
+							more[i].x = -10;
+						}
+						break;
+					case 1:
+						//console.log("Se movió para izqu")
+						more[i].x -= speed+3;
+						if (more[i].x < 0 ) 
+						{
+							more[i].x = canvas.width;
+						}
+						break;
+					case 2:
+						//console.log("Se movió para arriba")
+						more[i].y -= speed+3;
+						if (more[i].y < 0) 
+						{
+							more[i].y = canvas.height;
+						}
+						break;
+					case 3:
+						//console.log("Se movió para abajo")
+						more[i].y += speed+3;
+						if (more[i].y > canvas.height) 
+						{
+							more[i].y = -10;
+						}
+						break;					
+				}
+			}
+		}
+
+		function moveEnemys()
+		{
+			for (var i = enemys.length - 1; i >= 0; i--) 
+			{
+				switch(dir)
+				{
+					case 0:
+						console.log("Se movió para derecha")
+						enemys[i].x += speed+3;
+						if(enemys[i].x > canvas.width)
+						{
+							enemys[i].x = -10;
+						}
+						break;
+					case 1:
+						console.log("Se movió para izqu")
+						enemys[i].x -= speed+3;
+						if (enemys[i].x < 0 ) 
+						{
+							enemys[i].x = canvas.width;
+						}
+						break;
+					case 2:
+						console.log("Se movió para arriba")
+						enemys[i].y -= speed+3;
+						if (enemys[i].y < 0) 
+						{
+							enemys[i].y = canvas.height;
+						}
+						break;
+					case 3:
+						console.log("Se movió para abajo")
+						enemys[i].y += speed+3;
+						if (enemys[i].y > canvas.height) 
+						{
+							enemys[i].y = -10;
+						}
+						break;					
+				}
+			}
+		}
+
+		function random(m)
+		{
+			return Math.floor(Math.random()*m);
+		}
+	</script>
+</body>
+</html>
